@@ -1,0 +1,19 @@
+{
+  "name": "SMII7Y+",
+  "version": "1.0.0",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "dependencies": {
+    "@distube/ytdl-core": "^4.16.12",
+    "electron": "^42.5.1",
+    "express": "^5.2.1",
+    "plyr": "^3.8.4",
+    "render-media": "^4.1.0"
+  },
+  "allowScripts": {
+    "plyr@3.8.4": true,
+    "core-js@3.49.0": true
+  }
+}

@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <style>
+        @font-face {
+            font-family: 'VCR OSD Mono';
+            src: url('./assets/VCR_OSD_MONO_1.001.ttf') format('truetype');
+        }
+
+        body {
+            background: #111;
+            color: white;
+            font-family: 'VCR OSD Mono', monospace;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            text-transform: uppercase; /* Makes the retro font look even better */
+        }
+        .box {
+            background: #1c1c1c;
+            padding: 40px;
+            border-radius: 4px;
+            text-align: center;
+            border: 2px solid #fff;
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.1);
+        }
+        input {
+            width: 80%;
+            padding: 12px;
+            margin: 20px 0;
+            background: #000;
+            border: 2px solid #444;
+            color: #0f0; /* Green terminal text look for inputs */
+            font-family: 'VCR OSD Mono', monospace;
+            font-size: 16px;
+            outline: none;
+        }
+        input:focus {
+            border-color: #fff;
+        }
+        button {
+            padding: 12px 24px;
+            background: #fff;
+            color: #000;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+            font-family: 'VCR OSD Mono', monospace;
+            font-size: 16px;
+        }
+        button:hover {
+            background: #cc0000;
+            color: #fff;
+        }
+        #error {
+            color: #ff0055;
+            margin-top: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="box">
+        <h2>Welcome to SMII7Y+</h2>
+        <p>Enter YouTube V3 API Key:</p>
+        <input type="text" id="apiKey" placeholder="AIzaSy...">
+        <br>
+        <button onclick="submitKey()">ACTIVATE</button>
+        <p id="error"></p>
+    </div>
+
+    <script>
+        const { ipcRenderer } = require('electron');
+
+        function submitKey() {
+            const key = document.getElementById('apiKey').value;
+            ipcRenderer.send('save-key', key);
+        }
+
+        ipcRenderer.on('save-status', (event, arg) => {
+            if (!arg.success) {
+                document.getElementById('error').innerText = arg.message;
+            }
+        });
+    </script>
+</body>
+</html>

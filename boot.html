@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+    </style>
+</head>
+<body>
+    <video autoplay muted playsinline id="bootVideo">
+        <source src="./assets/logon.mp4" type="video/mp4">
+    </video>
+    <audio autoplay id="bootSound">
+        <source src="./assets/logon.mp3" type="audio/mp3">
+    </audio>
+
+    <script>
+        // Optional: Ensure everything plays smoothly or unmutes if needed
+        const video = document.getElementById('bootVideo');
+        const audio = document.getElementById('bootSound');
+
+        window.addEventListener('DOMContentLoaded', () => {
+            video.play().catch(err => console.log("Video auto-play blocked:", err));
+            audio.play().catch(err => console.log("Audio auto-play blocked:", err));
+        });
+    </script>
+</body>
+</html>

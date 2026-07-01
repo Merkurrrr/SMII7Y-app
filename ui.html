@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>SMII7Y+</title>
+    <style>
+        @font-face {
+            font-family: 'VCR OSD Mono';
+            src: url('./assets/VCR_OSD_MONO.ttf') format('truetype');
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { background-color: #0a0a0a; color: #ffffff; font-family: 'VCR OSD Mono', monospace; text-transform: uppercase; overflow-x: hidden; }
+
+        header { display: flex; align-items: center; justify-content: space-between; padding: 20px 4%; background: #000; position: sticky; top: 0; z-index: 1000; }
+        .logo-container img { height: 45px; }
+
+        .content-container { padding: 4%; }
+        .video-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
+
+        .video-card { background: #141414; border: 2px solid #222; border-radius: 4px; overflow: hidden; cursor: pointer; }
+        .video-card:hover { border-color: #cc0000; background: #1a1a1a; }
+
+        .preview-wrapper { width: 100%; height: 160px; background: #000; position: relative; overflow: hidden; pointer-events: none; }
+        .preview-wrapper video { width: 100%; height: 100%; object-fit: cover; border: none; }
+
+        .video-info { padding: 12px; text-align: center; }
+
+        #player-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 2000; justify-content: center; align-items: center; flex-direction: column; }
+        #app-video-player { width: 80%; max-width: 900px; border: 3px solid #fff; background: #000; }
+        .close-player { margin-top: 15px; padding: 10px 20px; background: #fff; color: #000; border: none; cursor: pointer; font-family: 'VCR OSD Mono'; font-size: 16px; }
+        .close-player:hover { background: #cc0000; color: #fff; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo-container"><img src="./assets/logo.jpg" alt="SMII7Y+"></div>
+    </header>
+
+    <div class="content-container">
+        <h2 style="margin-bottom: 20px;">LOCAL CASSETTE FEED (NOT ALL VIDEOS CUZ YT-DLP HAD PROBLEMS DOWNLOADING VIDEOS)</h2>
+        <div class="video-grid" id="main-feed"></div>
+    </div>
+
+    <div id="player-overlay">
+        <video id="app-video-player" controls autoplay></video>
+        <button class="close-player" onclick="closeVideo()">[ STOP TAPE ]</button>
+    </div>
+
+    <script>
+        const { fetchLocalVideos } = require('./youtube.js');
+
+        function loadLocalDashboard() {
+            const grid = document.getElementById('main-feed');
+            const videos = fetchLocalVideos();
+
+            grid.innerHTML = '';
+
+            if (!videos || videos.length === 0) {
+                grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: #666;">NO TAPES FOUND IN ./DVID FOLDER</div>';
+                return;
+            }
+
+            videos.forEach(video => {
+                if (!video.filePath || !video.fileName) return;
+
+                const card = document.createElement('div');
+                card.className = 'video-card';
+
+                card.innerHTML = `
+                    <div class="preview-wrapper">
+                        <video src="file://${video.filePath}" preload="metadata" muted></video>
+                    </div>
+                    <div class="video-info">
+                        <div style="font-size: 14px; word-wrap: break-word;">${video.title || video.fileName}</div>
+                        <div style="font-size: 10px; color: #666; margin-top: 8px;">[ PLAY TAPE ]</div>
+                    </div>
+                `;
+
+                // Routes video streaming directly through Express static directory port
+                const httpStreamUrl = `http://localhost:3999/stream/${encodeURIComponent(video.fileName)}`;
+
+                card.onclick = () => playVideo(httpStreamUrl);
+                grid.appendChild(card);
+            });
+        }
+
+        function playVideo(streamUrl) {
+            const overlay = document.getElementById('player-overlay');
+            const player = document.getElementById('app-video-player');
+
+            if (!overlay || !player) return;
+
+            overlay.style.display = 'flex';
+            player.src = streamUrl;
+            player.load();
+            player.play().catch(e => console.error("Playback start dropped:", e));
+        }
+
+        function closeVideo() {
+            const overlay = document.getElementById('player-overlay');
+            const player = document.getElementById('app-video-player');
+
+            if (player) {
+                player.pause();
+                player.src = "";
+            }
+            if (overlay) overlay.style.display = 'none';
+        }
+
+        document.addEventListener('DOMContentLoaded', loadLocalDashboard);
+    </script>
+</body>
+</html>
